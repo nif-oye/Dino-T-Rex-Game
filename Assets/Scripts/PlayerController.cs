@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     public float jumpForce = 14f;
     private Rigidbody2D rb;
     private bool isGrounded = false;
+    private bool jumpHeld = false;
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -14,18 +15,30 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // for mobile touch and click to simulate mobile touch
-        if (isGrounded && (Input.GetKeyDown(KeyCode.Space) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) || Input.GetMouseButtonDown(0)))
-        { Jump(); }
+        if (GameManager.gameStarted && isGrounded && (Input.GetKey(KeyCode.Space) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Stationary) || Input.GetMouseButton(0)))
+        {
+            jumpHeld = true;
+        }
+        else
+        {
+            jumpHeld = false;
+        }
+
+        if (jumpHeld)
+        {
+            Jump();
+        }
     }
 
     void Jump()
     {
-        rb.velocity = Vector2.up * jumpForce;
-        isGrounded = false;
+        if (isGrounded)
+        {
+            rb.velocity = Vector2.up * jumpForce;
+            isGrounded = false;
+        }
     }
 
-    // to check for contactr with ground and prevent double jumps...
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
